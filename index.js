@@ -68,7 +68,21 @@ class AutoDetectDecoderStream extends Transform {
 
             }
 
-            this.conv = Iconv.getDecoder(this._detectedEncoding, this._iconvOptions);
+            try {
+
+                // Try to make Iconv decoder
+                this.conv = Iconv.getDecoder(this._detectedEncoding, this._iconvOptions);
+
+            } catch (e) {
+
+                if (this._detectedEncoding === this._defaultEncoding) {
+                    throw e;
+                }
+
+                // Fallback decoder if Iconv does not support detected encoding
+                this.conv = Iconv.getDecoder(this._defaultEncoding, this._iconvOptions);
+
+            }
 
             const res = this.conv.write(this._detectionBuffer);
             delete this._detectionBuffer;
